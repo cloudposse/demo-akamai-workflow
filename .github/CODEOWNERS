@@ -1,0 +1,12 @@
+# Use this file to define individuals or teams that are responsible for code in a repository.
+# Read more: <https://help.github.com/articles/about-codeowners/>
+#
+# Order is important: the last matching pattern has the highest precedence
+
+# These owners will be the default owners for not specified
+*             @cloudposse-sandbox/edge-team
+
+# TODO: add individual owners for properties once modeled
+
+# edge-team must review all changes to workflows and CODEOWNERS
+.github/*           @cloudposse-sandbox/edge-team
