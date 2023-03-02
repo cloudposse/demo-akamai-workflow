@@ -1,0 +1,5 @@
+import:
+  - orgs/akadev/corp/_defaults
+
+vars:
+  stage: prod

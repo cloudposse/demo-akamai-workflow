@@ -1,0 +1,5 @@
+import:
+  - orgs/akadev/_defaults
+
+vars:
+  environment: corp

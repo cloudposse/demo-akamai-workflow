@@ -1,0 +1,5 @@
+import:
+  - akaprod/_defaults
+
+vars:
+  environment: corp
