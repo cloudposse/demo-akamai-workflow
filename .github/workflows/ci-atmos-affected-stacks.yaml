@@ -44,6 +44,7 @@ jobs:
         if: inputs.head-ref != ''
         id: head-ref
         run: git checkout ${{ inputs.head-ref }}
+        working-directory: main-branch
 
       - uses: hashicorp/setup-terraform@v2
       - uses: cloudposse/github-action-setup-atmos@v1.0.0
