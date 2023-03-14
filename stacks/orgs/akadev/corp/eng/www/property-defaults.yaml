@@ -30,4 +30,4 @@ components:
       metadata:
         component: property-activation
       vars:
-        property_name: www.acme2.com
+        property_name: www.acme3.com

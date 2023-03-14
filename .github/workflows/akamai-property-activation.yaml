@@ -14,3 +14,33 @@ jobs:
     uses: ./.github/workflows/ci-atmos-affected-stacks.yaml
     with:
       head-ref: HEAD~1
+
+  # Build a matrix of stacks that have been affected by the PR. Only include the stacks that are an instance of
+  # base-property
+  build-matrix:
+    needs: get-affected-stacks
+    if: ${{ needs.get-affected-stacks.outputs.has-affected-stacks == 'true' }}
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - id: matrix
+        run: |
+          matrix=$(echo ${{ needs.get-affected-stacks.outputs.affected }} | jq -c '{include:[.[] | select(.component_path=="components/terraform/base-property")]}')
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  # Plan and apply the changes
+  plan-apply:
+    name: ${{ matrix.stack }}-${{ matrix.component }}
+    needs:
+      - build-matrix
+    strategy:
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+    uses: ./.github/workflows/ci-atmos-plan-and-apply.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+      default-branch: ${{ github.event.repository.default_branch }}
+      stack: ${{ matrix.stack }}
+      component: ${{ matrix.component }}
+      component_path: ${{ matrix.component_path }}
+      environment: ${{ matrix.full_stack_name }}-draft
