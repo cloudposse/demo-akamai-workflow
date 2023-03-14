@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
-      has-changes: ${{ steps.matrix.outputs.matrix!='{include:[]}'}}
+      has-changes: ${{ steps.matrix.outputs.matrix!='{"include":[]}'}}
     steps:
       - id: matrix
         run: |
