@@ -1,0 +1,145 @@
+name: ci-atmos-plan-and-apply
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: The ref to checkout. If not provided, the pull_request head ref is used.
+        required: false
+        type: string
+        default: ${{ github.event.pull_request.head.sha }}
+      default-branch:
+        description: The default branch to use for the base ref.
+        required: false
+        type: string
+        default: ${{ github.event.repository.default_branch }}
+      stack:
+        description: The stack name.
+        required: true
+        type: string
+      component:
+        description: The component name.
+        required: true
+        type: string
+      component_path:
+        description: The component path.
+        required: true
+        type: string
+      environment:
+        description: The GitHub environment name to deploy to.
+        required: true
+        type: string
+    outputs:
+      dependencies:
+        description: The dependencies matrix
+        value: ${{ jobs.dependencies-matrix.outputs.matrix }}
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "atmos terraform plan ${{inputs.component}} -s ${{inputs.stack}}"
+  apply:
+    runs-on: ubuntu-latest
+    needs: plan
+    environment: ${{ inputs.environment }}
+    steps:
+      - run: echo "atmos terraform apply ${{inputs.component}} -s ${{inputs.stack}}"
+  dependencies-matrix:
+    runs-on: ubuntu-latest
+    needs:
+      - apply
+    steps:
+      - run: |
+          # This is a mock of what the atmos describe dependants command will do
+          if [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-eng-www" ]]; then
+          dependencies='[
+            {
+                "component": "www-activation",
+                "stack": "akadev-corp-eng",
+                "component_path": "components/terraform/base-property",
+                "full_stack_name": "akadev-corp-eng-www-activation"
+            }
+          ]'
+          elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-prod-www" ]]; then
+          dependencies='[
+            {
+                "component": "www-activation",
+                "stack": "akadev-corp-prod",
+                "component_path": "components/terraform/base-property",
+                "full_stack_name": "akadev-corp-prod-www-activation"
+            }
+          ]'
+          elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-eng-www-activation" ]]; then
+          dependencies='[
+            {
+                "component": "devdatastream",
+                "stack": "akadev-corp-eng",
+                "component_path": "components/terraform/datastream",
+                "full_stack_name": "akadev-corp-eng-devdatastream"
+            }
+          ]'
+          elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-prod-www-activation" ]]; then
+          dependencies='[
+            {
+                "component": "devdatastream",
+                "stack": "akadev-corp-eng",
+                "component_path": "components/terraform/datastream",
+                "full_stack_name": "akadev-corp-prod-prddatastream"
+            }
+          ]'
+          elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-eng-devdatastream" ]]; then
+          dependencies='[
+            {
+                "component": "devdatastream-activation",
+                "component_path": "components/terraform/datastream-aactivation",
+                "stack": "akadev-corp-eng",
+                "full_stack_name": "akadev-corp-eng-devdatastream-activation"
+            }
+          ]'
+          elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-prod-proddatastream" ]]; then
+          dependencies='[
+            {
+                "component": "proddatastream-activation",
+                "component_path": "components/terraform/datastream-activation",
+                "stack": "akadev-corp-prod",
+                "full_stack_name": "akadev-corp-prod-proddatastream-activation"
+            }
+          ]'
+          elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-eng-devdatastream-activation" ]]; then
+          dependencies='[
+            {
+                "component": "www",
+                "component_path": "components/terraform/base-property",
+                "stack": "akadev-corp-eng",
+                "full_stack_name": "akadev-corp-eng-www"
+            }
+          ]'
+          elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-prod-proddatastream-activation" ]]; then
+          dependencies='[
+            {
+                "component": "www",
+                "component_path": "components/terraform/base-property",
+                "stack": "akadev-corp-prod",
+                "full_stack_name": "akadev-corp-prod-www"
+            }
+          ]'
+          else
+            echo "Invalid parameter: ${{inputs.stack}}-${{inputs.component}}"
+            exit 1
+          fi
+          matrix=$(echo $dependencies | jq -c '{include:[.[]]}')
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  # plan-apply:
+  #   name: plan and apply ${{ matrix.stack }}-${{ matrix.component }}
+  #   needs:
+  #     - dependencies-matrix
+  #   strategy:
+  #     matrix: ${{ fromJson(needs.dependencies-matrix.outputs.matrix) }}
+  #   uses: ./.github/workflows/ci-atmos-plan-and-apply.yaml
+  #   with:
+  #     ref: ${{ inputs.ref }}
+  #     default-branch: ${{ inputs.default-branch }}
+  #     stack: ${{ matrix.stack }}
+  #     component: ${{ matrix.component }}
+  #     component_path: ${{ matrix.component_path }}
+  #     environment: ${{ matrix.full_stack_name }}

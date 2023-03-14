@@ -5,3 +5,15 @@ vars:
     - tenant
     - environment
     - stage
+
+terraform:
+  settings:
+    github:
+      wait_timer: 0
+      reviewers:
+        - type: Team
+          id: 7467827
+      deployment_branch_policy:
+        protected_branches: false
+        custom_branch_policies: true
+  vars: {}

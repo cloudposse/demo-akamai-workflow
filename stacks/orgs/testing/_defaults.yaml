@@ -1,0 +1,7 @@
+import:
+  - orgs/_defaults
+
+vars:
+  tenant: testing
+  environment: test
+  stage: tst

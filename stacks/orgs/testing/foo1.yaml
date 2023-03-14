@@ -1,0 +1,13 @@
+# stack config
+import:
+  - orgs/testing/_defaults
+  - catalog/foo
+
+components:
+  terraform:
+    foo1:
+      metadata:
+        component: foo
+        inherits:
+          - foo/defaults
+      vars: {}

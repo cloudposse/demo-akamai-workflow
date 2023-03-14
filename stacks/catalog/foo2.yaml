@@ -1,0 +1,11 @@
+# catalog/foo2.yaml
+
+components:
+  terraform:
+    foo/defaults2:
+      metadata:
+        type: abstract
+        component: foo
+      vars:
+        enabled: true
+        seed: 67890

@@ -1,0 +1,33 @@
+import:
+  - orgs/akadev/corp/prod/_defaults
+
+components:
+  terraform:
+    www:
+      settings:
+        github:
+          reviewers:
+            - type: Team
+              id: 7467827
+            - type: Team
+              id: 7467844
+      metadata:
+        component: base-property
+      vars:
+        property_name: www.acme.com
+
+    wwwactivation:
+      settings:
+        spacelift:
+          depends_on:
+            - www
+        github:
+          reviewers:
+            - type: Team
+              id: 7467827
+            - type: Team
+              id: 7467844
+      metadata:
+        component: property-activation
+      vars:
+        property_name: www.acme.com

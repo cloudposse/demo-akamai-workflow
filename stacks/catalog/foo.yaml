@@ -1,0 +1,14 @@
+# catalog/foo.yaml
+import:
+  - catalog/foo2.yaml
+
+components:
+  terraform:
+    foo/defaults:
+      metadata:
+        type: abstract
+        component: foo
+        inherits:
+          - foo/defaults2
+      vars:
+        enabled: true

@@ -1,0 +1,64 @@
+name: ci-atmos-affected-stacks
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: The ref to checkout. If not provided, the pull_request head ref is used.
+        required: false
+        type: string
+        default: ${{ github.event.pull_request.head.sha }}
+      head-ref:
+        description: The head ref to checkout. If not provided, the head default branch is used.
+        required: false
+        type: string
+      default-branch:
+        description: The default branch to use for the base ref.
+        required: false
+        type: string
+        default: ${{ github.event.repository.default_branch }}
+    outputs:
+      affected:
+        description: The affected stacks
+        value: ${{ jobs.get-affected-stacks.outputs.affected }}
+      has-affected-stacks:
+        description: Whether there are affected stacks
+        value: ${{ jobs.get-affected-stacks.outputs.affected != '[]' }}
+jobs:
+  get-affected-stacks:
+    name: get affected stacks
+    runs-on: ubuntu-latest
+    outputs:
+      affected: ${{ steps.transform.outputs.affected }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.default-branch }}
+          path: main-branch
+          fetch-depth: 0
+
+      - name: checkout head ref
+        if: inputs.head-ref != ''
+        id: head-ref
+        run: git checkout ${{ inputs.head-ref }}
+
+      - uses: hashicorp/setup-terraform@v2
+      - uses: cloudposse/github-action-setup-atmos@v1.0.0
+
+      - name: atmos affected stacks
+        id: affected
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          atmos describe affected --file affected.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
+
+      - name: transform affected output
+        id: transform
+        shell: bash
+        run: |
+          affected=$(jq -c '[.[] | {stack: .stack, component: .component, component_path: .component_path, full_stack_name: (.stack + "-" + .component)}]' < $(echo affected.json))
+          rm -f affected.json
+          echo "affected='$affected'" >> $GITHUB_OUTPUT

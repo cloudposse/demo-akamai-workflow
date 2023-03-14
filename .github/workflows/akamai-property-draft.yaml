@@ -1,0 +1,80 @@
+name: akamai-property-draft
+run-name: Akamai Property Build Rule Tree
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+jobs:
+  # Get a list of all stacks that have been affected by the PR
+  get-affected-stacks:
+    uses: ./.github/workflows/ci-atmos-affected-stacks.yaml
+
+  # Build a matrix of stacks that have been affected by the PR. Only include the stacks that are an instance of
+  # base-property
+  build-matrix:
+    needs: get-affected-stacks
+    if: ${{ needs.get-affected-stacks.outputs.has-affected-stacks == 'true' }}
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - id: matrix
+        run: |
+          matrix=$(echo ${{ needs.get-affected-stacks.outputs.affected }} | jq -c '{include:[.[] | select(.component_path=="components/terraform/base-property")]}')
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  # Create a "draft" deployment environment for each stack in the matrix. This environment will be auto-deployed to
+  # without approvals. This is to allow the PR to be tested by applying the changes to Akamai to build the rule tree
+  # but not activating it.
+  prep-draft-deployment-env:
+    needs: build-matrix
+    strategy:
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+    uses: ./.github/workflows/ci-atmos-create-update-deployment-env.yaml
+    with:
+      auto-deploy: true
+      ref: ${{ github.event.pull_request.head.sha }}
+      default-branch: ${{ github.event.repository.default_branch }}
+      stack: ${{ matrix.stack }}
+      component: ${{ matrix.component }}
+      full_stack_name: ${{ matrix.full_stack_name }}-draft
+    secrets:
+      environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
+
+  # Create the "real" deployment environment for each stack in the matrix. This is the environment that will be targeted
+  # once the PR is merged.
+  prep-deployment-env:
+    needs: build-matrix
+    strategy:
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+    uses: ./.github/workflows/ci-atmos-create-update-deployment-env.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+      default-branch: ${{ github.event.repository.default_branch }}
+      stack: ${{ matrix.stack }}
+      component: ${{ matrix.component }}
+      full_stack_name: ${{ matrix.full_stack_name }}
+    secrets:
+      environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
+
+  # Plan and apply the changes to the draft environment
+  plan-apply:
+    name: ${{ matrix.stack }}-${{ matrix.component }}
+    needs:
+      - build-matrix
+      - prep-draft-deployment-env
+      - prep-deployment-env
+    strategy:
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+    uses: ./.github/workflows/ci-atmos-plan-and-apply.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+      default-branch: ${{ github.event.repository.default_branch }}
+      stack: ${{ matrix.stack }}
+      component: ${{ matrix.component }}
+      component_path: ${{ matrix.component_path }}
+      environment: ${{ matrix.full_stack_name }}-draft
