@@ -56,7 +56,7 @@ jobs:
       - run: |
           # This is a mock of what the atmos describe dependants command will do
           if [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-eng-www" ]]; then
-          dependencies=<<EOF
+          dependencies<<EOF
             [
               {
                   "component": "www-activation",
@@ -67,7 +67,7 @@ jobs:
             ]
           EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-prod-www" ]]; then
-          dependencies=<<EOF
+          dependencies<<EOF
             [
               {
                   "component": "www-activation",
@@ -78,7 +78,7 @@ jobs:
             ]
           EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-eng-www-activation" ]]; then
-          dependencies=<<EOF
+          dependencies<<EOF
             [
               {
                   "component": "devdatastream",
@@ -89,7 +89,7 @@ jobs:
             ]
           EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-prod-www-activation" ]]; then
-          dependencies=<<EOF
+          dependencies<<EOF
             [
               {
                   "component": "devdatastream",
@@ -100,7 +100,7 @@ jobs:
             ]
           EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-eng-devdatastream" ]]; then
-          dependencies=<<EOF
+          dependencies<<EOF
             [
               {
                   "component": "devdatastream-activation",
@@ -111,7 +111,7 @@ jobs:
             ]
           EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-prod-proddatastream" ]]; then
-          dependencies=<<EOF
+          dependencies<<EOF
             [
               {
                   "component": "proddatastream-activation",
@@ -122,7 +122,7 @@ jobs:
             ]
           EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-eng-devdatastream-activation" ]]; then
-          dependencies=<<EOF
+          dependencies<<EOF
             [
               {
                   "component": "www",
@@ -133,7 +133,7 @@ jobs:
             ]
           EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-prod-proddatastream-activation" ]]; then
-          dependencies=<<EOF
+          dependencies<<EOF
             [
               {
                   "component": "www",
