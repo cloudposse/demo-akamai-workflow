@@ -23,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
+      has-changes: ${{ steps.matrix.outputs.matrix }}!='{include:[]}'
     steps:
       - id: matrix
         run: |
@@ -31,6 +32,7 @@ jobs:
 
   # Plan and apply the changes
   plan-apply:
+    if: ${{ needs.build-matrix.outputs.has-changes == 'true' }}
     name: ${{ matrix.stack }}-${{ matrix.component }}
     needs:
       - build-matrix
