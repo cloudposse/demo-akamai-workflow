@@ -53,77 +53,93 @@ jobs:
       - run: |
           # This is a mock of what the atmos describe dependants command will do
           if [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-eng-www" ]]; then
-          dependencies='[
-            {
-                "component": "www-activation",
-                "stack": "akadev-corp-eng",
-                "component_path": "components/terraform/base-property",
-                "full_stack_name": "akadev-corp-eng-www-activation"
-            }
-          ]'
+          dependencies=<<EOF
+            [
+              {
+                  "component": "www-activation",
+                  "stack": "akadev-corp-eng",
+                  "component_path": "components/terraform/base-property",
+                  "full_stack_name": "akadev-corp-eng-www-activation"
+              }
+            ]
+          EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-prod-www" ]]; then
-          dependencies='[
-            {
-                "component": "www-activation",
-                "stack": "akadev-corp-prod",
-                "component_path": "components/terraform/base-property",
-                "full_stack_name": "akadev-corp-prod-www-activation"
-            }
-          ]'
+          dependencies=<<EOF
+            [
+              {
+                  "component": "www-activation",
+                  "stack": "akadev-corp-prod",
+                  "component_path": "components/terraform/base-property",
+                  "full_stack_name": "akadev-corp-prod-www-activation"
+              }
+            ]
+          EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-eng-www-activation" ]]; then
-          dependencies='[
-            {
-                "component": "devdatastream",
-                "stack": "akadev-corp-eng",
-                "component_path": "components/terraform/datastream",
-                "full_stack_name": "akadev-corp-eng-devdatastream"
-            }
-          ]'
+          dependencies=<<EOF
+            [
+              {
+                  "component": "devdatastream",
+                  "stack": "akadev-corp-eng",
+                  "component_path": "components/terraform/datastream",
+                  "full_stack_name": "akadev-corp-eng-devdatastream"
+              }
+            ]
+          EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-prod-www-activation" ]]; then
-          dependencies='[
-            {
-                "component": "devdatastream",
-                "stack": "akadev-corp-eng",
-                "component_path": "components/terraform/datastream",
-                "full_stack_name": "akadev-corp-prod-prddatastream"
-            }
-          ]'
+          dependencies=<<EOF
+            [
+              {
+                  "component": "devdatastream",
+                  "stack": "akadev-corp-eng",
+                  "component_path": "components/terraform/datastream",
+                  "full_stack_name": "akadev-corp-prod-prddatastream"
+              }
+            ]
+          EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-eng-devdatastream" ]]; then
-          dependencies='[
-            {
-                "component": "devdatastream-activation",
-                "component_path": "components/terraform/datastream-aactivation",
-                "stack": "akadev-corp-eng",
-                "full_stack_name": "akadev-corp-eng-devdatastream-activation"
-            }
-          ]'
+          dependencies=<<EOF
+            [
+              {
+                  "component": "devdatastream-activation",
+                  "component_path": "components/terraform/datastream-aactivation",
+                  "stack": "akadev-corp-eng",
+                  "full_stack_name": "akadev-corp-eng-devdatastream-activation"
+              }
+            ]
+          EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-prod-proddatastream" ]]; then
-          dependencies='[
-            {
-                "component": "proddatastream-activation",
-                "component_path": "components/terraform/datastream-activation",
-                "stack": "akadev-corp-prod",
-                "full_stack_name": "akadev-corp-prod-proddatastream-activation"
-            }
-          ]'
+          dependencies=<<EOF
+            [
+              {
+                  "component": "proddatastream-activation",
+                  "component_path": "components/terraform/datastream-activation",
+                  "stack": "akadev-corp-prod",
+                  "full_stack_name": "akadev-corp-prod-proddatastream-activation"
+              }
+            ]
+          EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-eng-devdatastream-activation" ]]; then
-          dependencies='[
-            {
-                "component": "www",
-                "component_path": "components/terraform/base-property",
-                "stack": "akadev-corp-eng",
-                "full_stack_name": "akadev-corp-eng-www"
-            }
-          ]'
+          dependencies=<<EOF
+            [
+              {
+                  "component": "www",
+                  "component_path": "components/terraform/base-property",
+                  "stack": "akadev-corp-eng",
+                  "full_stack_name": "akadev-corp-eng-www"
+              }
+            ]
+          EOF
           elif [[ "${{inputs.stack}}-${{inputs.component}}" == "akadev-corp-prod-proddatastream-activation" ]]; then
-          dependencies='[
-            {
-                "component": "www",
-                "component_path": "components/terraform/base-property",
-                "stack": "akadev-corp-prod",
-                "full_stack_name": "akadev-corp-prod-www"
-            }
-          ]'
+          dependencies=<<EOF
+            [
+              {
+                  "component": "www",
+                  "component_path": "components/terraform/base-property",
+                  "stack": "akadev-corp-prod",
+                  "full_stack_name": "akadev-corp-prod-www"
+              }
+            ]
+          EOF
           else
             echo "Invalid parameter: ${{inputs.stack}}-${{inputs.component}}"
             exit 1
