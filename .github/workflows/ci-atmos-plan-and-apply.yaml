@@ -32,6 +32,8 @@ on:
       dependencies:
         description: The dependencies matrix
         value: ${{ jobs.dependencies-matrix.outputs.matrix }}
+      has-dependencies:
+        value: ${{ jobs.dependencies-matrix.outputs.matrix!='{"include":[]}'}}
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -128,18 +130,3 @@ jobs:
           fi
           matrix=$(echo $dependencies | jq -c '{include:[.[]]}')
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
-
-  # plan-apply:
-  #   name: plan and apply ${{ matrix.stack }}-${{ matrix.component }}
-  #   needs:
-  #     - dependencies-matrix
-  #   strategy:
-  #     matrix: ${{ fromJson(needs.dependencies-matrix.outputs.matrix) }}
-  #   uses: ./.github/workflows/ci-atmos-plan-and-apply.yaml
-  #   with:
-  #     ref: ${{ inputs.ref }}
-  #     default-branch: ${{ inputs.default-branch }}
-  #     stack: ${{ matrix.stack }}
-  #     component: ${{ matrix.component }}
-  #     component_path: ${{ matrix.component_path }}
-  #     environment: ${{ matrix.full_stack_name }}

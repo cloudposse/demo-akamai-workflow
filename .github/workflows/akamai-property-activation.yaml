@@ -46,3 +46,20 @@ jobs:
       component: ${{ matrix.component }}
       component_path: ${{ matrix.component_path }}
       environment: ${{ matrix.full_stack_name }}-draft
+
+  # Plan and apply the dependant changes
+  plan-apply-dependants:
+    if: ${{ needs.plan-apply.outputs.has-dependencies == 'true' }}
+    name: ${{ matrix.stack }}-${{ matrix.component }}
+    needs:
+      - plan-apply
+    strategy:
+      matrix: ${{ fromJson(needs.plan-apply.outputs.dependencies) }}
+    uses: ./.github/workflows/ci-atmos-plan-and-apply.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+      default-branch: ${{ github.event.repository.default_branch }}
+      stack: ${{ matrix.stack }}
+      component: ${{ matrix.component }}
+      component_path: ${{ matrix.component_path }}
+      environment: ${{ matrix.full_stack_name }}-draft
