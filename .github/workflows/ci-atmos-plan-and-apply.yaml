@@ -54,6 +54,6 @@ jobs:
       has-dependencies: ${{ steps.matrix.outputs.matrix!='{"include":[]}'}}
     steps:
       - run: |
-          dependencies=$(./.github/workflows/deps.pl "${{inputs.stack}}-${{inputs.component}}")
+          dependencies=$(./scripts/deps.pl "${{inputs.stack}}-${{inputs.component}}")
           matrix=$(echo "$dependencies" | jq -c '{include:[.[]]}')
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
