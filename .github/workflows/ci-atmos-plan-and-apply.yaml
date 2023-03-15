@@ -53,6 +53,9 @@ jobs:
       matrix: ${{ steps.matrix.outputs.matrix }}
       has-dependencies: ${{ steps.matrix.outputs.matrix!='{"include":[]}'}}
     steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
       - run: |
           dependencies=$(./scripts/deps.pl "${{inputs.stack}}-${{inputs.component}}")
           matrix=$(echo "$dependencies" | jq -c '{include:[.[]]}')
