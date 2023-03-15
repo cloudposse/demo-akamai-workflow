@@ -58,5 +58,5 @@ jobs:
           ref: ${{ inputs.ref }}
       - id: matrix
         run: |
-          metrix=$(./scripts/deps.pl "${{inputs.stack}}-${{inputs.component}}"| jq -c '{include:[.[]]}')
+          matrix=$(./scripts/deps.pl "${{inputs.stack}}-${{inputs.component}}"| jq -c '{include:[.[]]}')
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
