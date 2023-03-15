@@ -56,6 +56,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "${{ needs.plan-apply.outputs.has-dependencies }}"
-      - run: echo ""
       - run: echo "${{ needs.plan-apply.outputs.dependencies }}"
 
