@@ -31,7 +31,7 @@ jobs:
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   # Plan and apply the changes
-  plan-apply:
+  property:
     if: ${{ needs.build-matrix.outputs.has-changes == 'true' }}
     name: ${{ matrix.stack }}-${{ matrix.component }}
     needs:
@@ -47,13 +47,13 @@ jobs:
       component_path: ${{ matrix.component_path }}
       environment: ${{ matrix.full_stack_name }}
 
-  dependencies-level-1:
-    if: ${{ needs.plan-apply.outputs.has-dependencies == 'true' }}
+  property-activation:
+    if: ${{ needs.property.outputs.has-dependencies == 'true' }}
     name: ${{ matrix.stack }}-${{ matrix.component }}
     needs:
-      - plan-apply
+      - property
     strategy:
-      matrix: ${{ fromJson(needs.plan-apply.outputs.dependencies) }}
+      matrix: ${{ fromJson(needs.property.outputs.dependencies) }}
     uses: ./.github/workflows/ci-atmos-plan-and-apply.yaml
     with:
       ref: ${{ github.event.pull_request.head.sha }}
@@ -63,13 +63,13 @@ jobs:
       component_path: ${{ matrix.component_path }}
       environment: ${{ matrix.full_stack_name }}
 
-  dependencies-level-2:
-    if: ${{ needs.dependencies-level-1.outputs.has-dependencies == 'true' }}
+  datastream:
+    if: ${{ needs.property-activation.outputs.has-dependencies == 'true' }}
     name: ${{ matrix.stack }}-${{ matrix.component }}
     needs:
-      - dependencies-level-1
+      - property-activation
     strategy:
-      matrix: ${{ fromJson(needs.dependencies-level-1.outputs.dependencies) }}
+      matrix: ${{ fromJson(needs.property-activation.outputs.dependencies) }}
     uses: ./.github/workflows/ci-atmos-plan-and-apply.yaml
     with:
       ref: ${{ github.event.pull_request.head.sha }}
@@ -79,13 +79,13 @@ jobs:
       component_path: ${{ matrix.component_path }}
       environment: ${{ matrix.full_stack_name }}
 
-  dependencies-level-3:
-    if: ${{ needs.dependencies-level-2.outputs.has-dependencies == 'true' }}
+  datastream-activation:
+    if: ${{ needs.datastream.outputs.has-dependencies == 'true' }}
     name: ${{ matrix.stack }}-${{ matrix.component }}
     needs:
-      - dependencies-level-2
+      - datastream
     strategy:
-      matrix: ${{ fromJson(needs.dependencies-level-2.outputs.dependencies) }}
+      matrix: ${{ fromJson(needs.datastream.outputs.dependencies) }}
     uses: ./.github/workflows/ci-atmos-plan-and-apply.yaml
     with:
       ref: ${{ github.event.pull_request.head.sha }}
