@@ -55,7 +55,7 @@ jobs:
       component: ${{ inputs.component }}
       full_stack_name: ${{ inputs.stack }}-${{ inputs.component }}
     secrets:
-      environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
+      environments_github_token: ${{ secrets.environments_github_token }}
 
   apply:
     runs-on: ubuntu-latest
