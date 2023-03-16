@@ -1,6 +1,10 @@
 name: ci-atmos-plan-and-apply
 on:
   workflow_call:
+    secrets:
+      environments_github_token:
+        description: A GitHub token with write access to the repository's deployments.
+        required: true
     inputs:
       ref:
         description: The ref to checkout. If not provided, the pull_request head ref is used.
@@ -39,6 +43,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "atmos terraform plan ${{inputs.component}} -s ${{inputs.stack}}"
+
+  # Create the "real" deployment environment for each stack in the matrix. This is the environment that will be targeted
+  # once the PR is merged.
+  prep-deployment-env:
+    uses: ./.github/workflows/ci-atmos-create-update-deployment-env.yaml
+    with:
+      ref: ${{ inputs.ref }}
+      default-branch: ${{ inputs.default_branch }}
+      stack: ${{ inputs.stack }}
+      component: ${{ inputs.component }}
+      full_stack_name: ${{ inputs.stack }}-${{ inputs.component }}
+    secrets:
+      environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
+
   apply:
     runs-on: ubuntu-latest
     needs: plan
