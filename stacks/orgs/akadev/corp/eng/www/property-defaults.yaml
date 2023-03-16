@@ -14,7 +14,7 @@ components:
       metadata:
         component: base-property
       vars:
-        property_name: www.acme30.com
+        property_name: www.acme31.com
 
     wwwactivation:
       settings:
