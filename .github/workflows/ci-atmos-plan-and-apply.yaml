@@ -67,6 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - apply
+      - prep-deployment-env
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
       has-dependencies: ${{ steps.matrix.outputs.matrix!='{"include":[]}'}}
