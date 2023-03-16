@@ -7,25 +7,17 @@ on:
       - synchronize
       - reopened
       - ready_for_review
-
 jobs:
-  # Get a list of all stacks that have been affected by the PR
   get-affected-stacks:
-    uses: ./.github/workflows/ci-atmos-affected-stacks.yaml
-
-  # Build a matrix of stacks that have been affected by the PR. Only include the stacks that are an instance of
-  # base-property
-  build-matrix:
-    needs: get-affected-stacks
-    if: ${{ needs.get-affected-stacks.outputs.has-affected-stacks == 'true' }}
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.matrix.outputs.matrix }}
+      matrix: ${{ steps.affected.outputs.matrix }}
     steps:
-      - id: matrix
-        run: |
-          matrix=$(echo ${{ needs.get-affected-stacks.outputs.affected }} | jq -c '{include:[.[] | select(.component_path=="components/terraform/base-property")]}')
-          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+      - uses: cloudposse/github-action-setup-atmos@v1.0.0
+      - id: affected
+        uses: cloudposse/github-action-atmos-affected-stacks@feature/initial-implementation
 
   # Create a "draft" deployment environment for each stack in the matrix. This environment will be auto-deployed to
   # without approvals. This is to allow the PR to be tested by applying the changes to Akamai to build the rule tree
@@ -33,7 +25,8 @@ jobs:
   prep-draft-deployment-env:
     needs: build-matrix
     strategy:
-      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.affected.outputs.matrix) }}
+    if: ${{ matrix.component_path=="components/terraform/base-property" }}
     uses: ./.github/workflows/ci-atmos-create-update-deployment-env.yaml
     with:
       auto-deploy: true
@@ -53,7 +46,8 @@ jobs:
       - prep-draft-deployment-env
       - prep-deployment-env
     strategy:
-      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.affected.outputs.matrix) }}
+    if: ${{ matrix.component_path=="components/terraform/base-property" }}
     uses: ./.github/workflows/ci-atmos-plan-and-apply.yaml
     with:
       ref: ${{ github.event.pull_request.head.sha }}
