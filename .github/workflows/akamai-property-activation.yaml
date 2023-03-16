@@ -46,6 +46,8 @@ jobs:
       component: ${{ matrix.component }}
       component_path: ${{ matrix.component_path }}
       environment: ${{ matrix.full_stack_name }}
+    secrets:
+      environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
 
   property-activation:
     if: ${{ needs.property.outputs.has-dependencies == 'true' }}
@@ -62,6 +64,8 @@ jobs:
       component: ${{ matrix.component }}
       component_path: ${{ matrix.component_path }}
       environment: ${{ matrix.full_stack_name }}
+    secrets:
+      environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
 
   datastream:
     if: ${{ needs.property-activation.outputs.has-dependencies == 'true' }}
@@ -78,6 +82,8 @@ jobs:
       component: ${{ matrix.component }}
       component_path: ${{ matrix.component_path }}
       environment: ${{ matrix.full_stack_name }}
+    secrets:
+      environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
 
   datastream-activation:
     if: ${{ needs.datastream.outputs.has-dependencies == 'true' }}
@@ -94,3 +100,5 @@ jobs:
       component: ${{ matrix.component }}
       component_path: ${{ matrix.component_path }}
       environment: ${{ matrix.full_stack_name }}
+    secrets:
+      environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}

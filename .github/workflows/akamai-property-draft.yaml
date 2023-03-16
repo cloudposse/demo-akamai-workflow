@@ -45,22 +45,6 @@ jobs:
     secrets:
       environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
 
-  # Create the "real" deployment environment for each stack in the matrix. This is the environment that will be targeted
-  # once the PR is merged.
-  prep-deployment-env:
-    needs: build-matrix
-    strategy:
-      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
-    uses: ./.github/workflows/ci-atmos-create-update-deployment-env.yaml
-    with:
-      ref: ${{ github.event.pull_request.head.sha }}
-      default-branch: ${{ github.event.repository.default_branch }}
-      stack: ${{ matrix.stack }}
-      component: ${{ matrix.component }}
-      full_stack_name: ${{ matrix.full_stack_name }}
-    secrets:
-      environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
-
   # Plan and apply the changes to the draft environment
   plan-apply:
     name: ${{ matrix.stack }}-${{ matrix.component }}
@@ -78,3 +62,5 @@ jobs:
       component: ${{ matrix.component }}
       component_path: ${{ matrix.component_path }}
       environment: ${{ matrix.full_stack_name }}-draft
+    secrets:
+      environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
