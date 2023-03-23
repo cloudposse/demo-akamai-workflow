@@ -8,25 +8,34 @@ on:
       - reopened
       - ready_for_review
 jobs:
-  get-affected-stacks:
+  get-affected-property-stacks:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.affected.outputs.matrix }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      has-affected-stacks: ${{ steps.matrix.outputs.matrix!='{"include":[]}'}}
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v2
       - uses: cloudposse/github-action-setup-atmos@v1.0.0
       - id: affected
         uses: cloudposse/github-action-atmos-affected-stacks@feature/initial-implementation
+        with:
+          install-atmos: false
+          install-terraform: false
+      - id: matrix
+        run: |
+          matrix=$(echo ${{ steps.affected.outputs.affected }} | jq -c '{include:[.[] | select(.component_path=="components/terraform/base-property")]}')
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   # Create a "draft" deployment environment for each stack in the matrix. This environment will be auto-deployed to
   # without approvals. This is to allow the PR to be tested by applying the changes to Akamai to build the rule tree
   # but not activating it.
-  prep-draft-deployment-env:
-    needs: build-matrix
+  prep-environment:
+    name: upsert deploy env ${{ matrix.stack_slug }}-draft
+    needs: get-affected-property-stacks
     strategy:
-      matrix: ${{ fromJson(needs.affected.outputs.matrix) }}
-    if: ${{ matrix.component_path=="components/terraform/base-property" }}
+      matrix: ${{ fromJson(needs.get-affected-property-stacks.outputs.matrix) }}
+    if: ${{ needs.get-affected-property-stacks.outputs.has-affected-stacks == 'true' }}
     uses: ./.github/workflows/ci-atmos-create-update-deployment-env.yaml
     with:
       auto-deploy: true
@@ -34,27 +43,27 @@ jobs:
       default-branch: ${{ github.event.repository.default_branch }}
       stack: ${{ matrix.stack }}
       component: ${{ matrix.component }}
-      full_stack_name: ${{ matrix.full_stack_name }}-draft
+      stack_slug: ${{ matrix.stack_slug }}-draft
     secrets:
       environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
 
   # Plan and apply the changes to the draft environment
-  plan-apply:
-    name: ${{ matrix.stack }}-${{ matrix.component }}
+  deploy-property-draft:
+    name: deploy draft ${{ matrix.stack_slug }}
     needs:
-      - build-matrix
-      - prep-draft-deployment-env
-      - prep-deployment-env
+      - get-affected-property-stacks
+      - prep-environment
     strategy:
-      matrix: ${{ fromJson(needs.affected.outputs.matrix) }}
-    if: ${{ matrix.component_path=="components/terraform/base-property" }}
+      matrix: ${{ fromJson(needs.get-affected-property-stacks.outputs.matrix) }}
     uses: ./.github/workflows/ci-atmos-plan-and-apply.yaml
+    if: ${{ needs.get-affected-property-stacks.outputs.has-affected-stacks == 'true' }}
     with:
       ref: ${{ github.event.pull_request.head.sha }}
       default-branch: ${{ github.event.repository.default_branch }}
       stack: ${{ matrix.stack }}
       component: ${{ matrix.component }}
       component_path: ${{ matrix.component_path }}
-      environment: ${{ matrix.full_stack_name }}-draft
+      environment: ${{ matrix.stack_slug }}-draft
+      stack_slug: ${{ matrix.stack_slug }}
     secrets:
       environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}

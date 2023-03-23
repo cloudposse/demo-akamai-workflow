@@ -20,7 +20,7 @@ on:
         description: The atmos stack to create or update the deployment environment for.
         required: true
         type: string
-      full_stack_name:
+      stack_slug:
         description: The atmos full stack name to create or update the deployment environment for.
         required: true
         type: string
@@ -76,7 +76,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.environments_github_token }}"\
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "${{github.api_url}}/repos/${{github.repository}}/environments/${{inputs.full_stack_name}}" \
+            "${{github.api_url}}/repos/${{github.repository}}/environments/${{inputs.stack_slug}}" \
           -d '${{ steps.payload.outputs.payload }}')
 
           # The curl command doesn't fail if the GitHub API returns an error. We need to check the result code and exit 
@@ -96,7 +96,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.environments_github_token }}"\
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "${{github.api_url}}/repos/${{github.repository}}/environments/${{inputs.full_stack_name}}" \
+            "${{github.api_url}}/repos/${{github.repository}}/environments/${{inputs.stack_slug}}" \
           -d '${{ steps.auto-deploy-payload.outputs.payload }}')
 
           # The curl command doesn't fail if the GitHub API returns an error. We need to check the result code and exit 

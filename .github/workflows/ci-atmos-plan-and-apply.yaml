@@ -32,6 +32,10 @@ on:
         description: The GitHub environment name to deploy to.
         required: true
         type: string
+      stack_slug:
+        description: The atmos full stack name to create or update the deployment environment for.
+        required: true
+        type: string
     outputs:
       dependencies:
         description: The dependencies matrix
@@ -53,7 +57,7 @@ jobs:
       default-branch: ${{ inputs.default_branch }}
       stack: ${{ inputs.stack }}
       component: ${{ inputs.component }}
-      full_stack_name: ${{ inputs.stack }}-${{ inputs.component }}
+      stack_slug: ${{ inputs.stack_slug }}
     secrets:
       environments_github_token: ${{ secrets.environments_github_token }}
 
