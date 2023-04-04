@@ -8,6 +8,8 @@ vars:
 
 terraform:
   settings:
+    akamai:
+      secrets-arn: arn:aws:secretsmanager:us-east-1:000000000000:secret:MySecret-PlMes3
     github:
       wait_timer: 0
       reviewers:

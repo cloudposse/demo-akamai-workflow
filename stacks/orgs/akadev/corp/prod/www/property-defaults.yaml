@@ -21,12 +21,6 @@ components:
         spacelift:
           depends_on:
             - www
-        github:
-          reviewers:
-            - type: Team
-              id: 7467827
-            - type: Team
-              id: 7467844
       metadata:
         component: property-activation
       vars:

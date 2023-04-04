@@ -5,6 +5,8 @@ components:
   terraform:
     www:
       settings:
+        akamai:
+          secrets-arn: arn:aws:secretsmanager:us-east-1:111111111111:secret:MySecret-O0eM3e
         github:
           reviewers:
             - type: Team

@@ -11,7 +11,7 @@ on:
 jobs:
   # Get a list of all stacks that have been affected by the PR
   get-affected-stacks:
-    uses: ./.github/workflows/ci-atmos-affected-stacks.yaml
+    uses: cloudposse/github-action-atmos-affected-stacks@0.0.1
     with:
       head-ref: HEAD~1
 

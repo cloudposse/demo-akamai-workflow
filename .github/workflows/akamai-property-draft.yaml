@@ -18,7 +18,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v2
       - uses: cloudposse/github-action-setup-atmos@v1.0.0
       - id: affected
-        uses: cloudposse/github-action-atmos-affected-stacks@feature/initial-implementation
+        uses: cloudposse/github-action-atmos-affected-stacks@0.0.1
         with:
           install-atmos: false
           install-terraform: false
