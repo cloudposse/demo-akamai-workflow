@@ -1,0 +1,69 @@
+name: Feature branch
+run-name: Feature branch - Test
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+jobs:
+  get-affected-stacks:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      has-affected-stacks: ${{ steps.matrix.outputs.matrix!='{"include":[]}'}}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+      - uses: cloudposse/github-action-setup-atmos@v1.0.0
+      - id: affected
+        uses: cloudposse/github-action-atmos-affected-stacks@0.0.1
+        with:
+          install-atmos: false
+          install-terraform: false
+      - id: matrix
+        run: |
+          matrix=$(echo ${{ steps.affected.outputs.affected }} | jq -c '{include:[.[]]}')
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  # Create a "draft" deployment environment for each stack in the matrix. This environment will be auto-deployed to
+  # without approvals. This is to allow the PR to be tested by applying the changes to Akamai to build the rule tree
+  # but not activating it.
+  prep-environment:
+    name: upsert deploy env ${{ matrix.stack_slug }}-draft
+    needs: get-affected-property-stacks
+    strategy:
+      matrix: ${{ fromJson(needs.get-affected-property-stacks.outputs.matrix) }}
+    if: ${{ needs.get-affected-property-stacks.outputs.has-affected-stacks == 'true' }}
+    uses: ./.github/workflows/ci-atmos-create-update-deployment-env.yaml
+    with:
+      auto-deploy: true
+      ref: ${{ github.event.pull_request.head.sha }}
+      default-branch: ${{ github.event.repository.default_branch }}
+      stack: ${{ matrix.stack }}
+      component: ${{ matrix.component }}
+      stack_slug: ${{ matrix.stack_slug }}-draft
+    secrets:
+      environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
+
+  # Plan and apply the changes to the draft environment
+  deploy-property-draft:
+    name: deploy draft ${{ matrix.stack_slug }}
+    needs:
+      - get-affected-property-stacks
+      - prep-environment
+    strategy:
+      matrix: ${{ fromJson(needs.get-affected-property-stacks.outputs.matrix) }}
+    uses: ./.github/workflows/ci-atmos-plan-and-apply.yaml
+    if: ${{ needs.get-affected-property-stacks.outputs.has-affected-stacks == 'true' }}
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+      default-branch: ${{ github.event.repository.default_branch }}
+      stack: ${{ matrix.stack }}
+      component: ${{ matrix.component }}
+      component_path: ${{ matrix.component_path }}
+      environment: ${{ matrix.stack_slug }}-draft
+      stack_slug: ${{ matrix.stack_slug }}
+    secrets:
+      environments_github_token: ${{ secrets.DEPLOYMENTS_GITHUB_TOKEN }}
