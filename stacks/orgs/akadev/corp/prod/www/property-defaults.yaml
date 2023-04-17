@@ -15,6 +15,7 @@ components:
         component: base-property
       vars:
         property_name: www.acme.com
+        test: test
 
     wwwactivation:
       settings:
