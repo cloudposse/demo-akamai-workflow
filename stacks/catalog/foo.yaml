@@ -12,4 +12,4 @@ components:
           - foo/defaults2
       vars:
         enabled: true
-        test: test
+        test: test2
