@@ -1,3 +1,1 @@
 # example-infrastructure-atmos-gha
-
-
