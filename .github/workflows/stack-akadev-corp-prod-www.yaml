@@ -1,7 +1,6 @@
 name: Stack `akadev-corp-prod` `www`
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch: {}
 
 permissions:
   contents: write
