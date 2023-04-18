@@ -1,0 +1,16 @@
+name: Stack `akadev-corp-prod` `www`
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  do:
+    uses: cloudposse/github-actions-workflows-atmos/.github/workflows/stack-deploy.yml@main
+    with:
+      stack: akadev-corp-prod
+      component: www
+      environment: akadev-corp-prod-www
