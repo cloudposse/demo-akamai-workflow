@@ -13,3 +13,5 @@ jobs:
       stack: akadev-corp-prod
       component: www
       environment: akadev-corp-prod-www
+    secrets:
+      github-private-actions-pat: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
