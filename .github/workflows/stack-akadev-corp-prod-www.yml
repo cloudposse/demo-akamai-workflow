@@ -1,4 +1,4 @@
-name: Stack `akadev-corp-prod` `www`
+name: Stack akadev-corp-prod www
 on:
   workflow_dispatch: {}
 

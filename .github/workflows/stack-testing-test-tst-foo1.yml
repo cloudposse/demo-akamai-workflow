@@ -1,4 +1,4 @@
-name: Stack `testing-test-tst` `foo1`
+name: Stack testing-test-tst foo1
 on:
   workflow_dispatch: {}
 
