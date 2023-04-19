@@ -1,0 +1,20 @@
+name: Stack akadev-corp-prod www
+on:
+  workflow_dispatch: {}
+
+permissions:
+  deployments: write
+  id-token: write
+  contents: read
+
+
+
+jobs:
+  do:
+    uses: cloudposse/github-actions-workflows-atmos/.github/workflows/stack-deploy.yml@main
+    with:
+      stack: akadev-corp-prod
+      component: www
+      environment: akadev-corp-prod-www
+    secrets:
+      github-private-actions-pat: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
